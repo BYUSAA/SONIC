@@ -387,4 +387,4 @@ Nginx for robust load balancing and serving
 Node.js community for excellent packages and support
 
 📞 Support
-For support, email m.byusa@alustudent.com or create an issue in the GitHub repository.
+For support, email m.byusa@alustudent.com  or create an issue in the GitHub repository.
