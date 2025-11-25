@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonic - Music Discovery Platform</title>
+    <style>
+        /* Your existing CSS remains the same */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #ffffff 0%, #666666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #999;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .search-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        #searchInput {
+            flex: 1;
+            padding: 20px 30px;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: #ffffff;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+        }
+
+        #searchInput::placeholder {
+            color: #888;
+        }
+
+        .btn {
+            padding: 20px 40px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 12px 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn.active {
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #999;
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #ffffff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: rgba(255, 50, 50, 0.2);
+            border: 2px solid rgba(255, 50, 50, 0.5);
+            color: #ff6b6b;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            display: none;
+            text-align: center;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+        .result-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 50px rgba(255, 255, 255, 0.1);
+        }
+
+        .result-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            filter: grayscale(100%) contrast(1.2);
+            transition: filter 0.3s ease;
+        }
+
+        .result-card:hover .result-image {
+            filter: grayscale(0%) contrast(1);
+        }
+
+        .result-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .result-artist {
+            font-size: 1rem;
+            color: #999;
+            margin-bottom: 15px;
+        }
+
+        .result-details {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .detail-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .play-button {
+            background: #1DB954;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .play-button:hover {
+            background: #1ed760;
+            transform: scale(1.05);
+        }
+
+        .play-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .player-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .player-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .player-album-art {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-track-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .player-artist-name {
+            color: #999;
+            font-size: 1rem;
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .player-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .player-button:hover {
+            color: #1DB954;
+        }
+
+        .player-button.play-pause {
+            font-size: 2rem;
+        }
+
+        .player-progress {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: #1DB954;
+            border-radius: 3px;
+            width: 0%;
+        }
+
+        .time-display {
+            font-size: 0.9rem;
+            color: #999;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .volume-bar {
+            width: 100px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .volume-level {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: #1DB954;
+            border-radius: 3px;
+            width: 70%;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 40px 20px;
+        }
+
+        .modal-content {
+            max-width: 800px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 50px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 2.5rem;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            line-height: 1;
+        }
+
+        .close-modal:hover {
+            transform: rotate(90deg);
+            color: #999;
+        }
+
+        .modal-image {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 20px;
+            margin: 0 auto 30px;
+            display: block;
+            filter: grayscale(100%) contrast(1.2);
+        }
+
+        .modal-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .modal-info {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .info-value {
+            color: #999;
+        }
+
+        .spotify-link {
+            display: inline-block;
+            background: #ffffff;
+            color: #000000;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .spotify-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 60px 0 20px;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .preview-notice {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .source-selector {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .source-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .source-btn.active {
+            background: #1DB954;
+            border-color: #1DB954;
+        }
+
+        .source-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .youtube-player {
+            width: 100%;
+            max-width: 560px;
+            height: 315px;
+            margin: 20px auto;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        /* NEW: Audio permission banner */
+        .audio-permission-banner {
+            background: linear-gradient(135deg, #1DB954, #1ed760);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 2000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .audio-permission-banner button {
+            background: white;
+            color: #1DB954;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin-left: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .audio-permission-banner button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .search-container {
+                flex-direction: column;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 30px;
+            }
+
+            .player-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .player-progress {
+                width: 100%;
+            }
+
+            .youtube-player {
+                height: 200px;
+            }
+        }
+
+        /* YouTube player container */
+        #youtubePlayerContainer {
+            width: 100%;
+            max-width: 560px;
+            height: 315px;
+            margin: 20px auto;
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+        }
+
+        #youtubePlayer {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- NEW: Audio permission banner -->
+    <div class="audio-permission-banner" id="audioPermissionBanner">
+        <span>🔊 Click to enable audio playback on this website</span>
+        <button onclick="enableAudioPlayback()">Enable Audio</button>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Sonic</h1>
+            <div class="subtitle">Music Discovery Platform</div>
+        </header>
+
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search for tracks, artists, albums, or playlists...">
+                <button class="btn" onclick="performSearch()">Search</button>
+            </div>
+
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-type="track">Tracks</button>
+                <button class="filter-btn" data-type="artist">Artists</button>
+                <button class="filter-btn" data-type="album">Albums</button>
+                <button class="filter-btn" data-type="playlist">Playlists</button>
+            </div>
+        </div>
+
+        <div class="loading">
+            <div class="spinner"></div>
+            <div>Searching Music Sources...</div>
+        </div>
+
+        <div class="error-message"></div>
+
+        <div class="results-grid" id="resultsGrid"></div>
+        
+        <h2 class="section-title" id="playlistsTitle" style="display: none;">Playlists with this artist</h2>
+        <div class="results-grid" id="playlistsGrid"></div>
+
+        <!-- YouTube Player Container -->
+        <div id="youtubePlayerContainer">
+            <div id="youtubePlayer"></div>
+        </div>
+    </div>
+
+    <div class="player-section" id="playerSection">
+        <div class="player-container">
+            <img id="playerAlbumArt" src="" alt="Album Art" class="player-album-art">
+            <div class="player-info">
+                <div id="playerTrackName" class="player-track-name">Track Name</div>
+                <div id="playerArtistName" class="player-artist-name">Artist Name</div>
+            </div>
+            <div class="player-controls">
+                <button class="player-button" id="prevButton">⏮</button>
+                <button class="player-button play-pause" id="playPauseButton">▶</button>
+                <button class="player-button" id="nextButton">⏭</button>
+            </div>
+            <div class="player-progress">
+                <span id="currentTime" class="time-display">0:00</span>
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress" id="progress"></div>
+                </div>
+                <span id="totalTime" class="time-display">0:00</span>
+            </div>
+            <div class="volume-control">
+                <button class="player-button" id="volumeButton">🔊</button>
+                <div class="volume-bar" id="volumeBar">
+                    <div class="volume-level" id="volumeLevel"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // Spotify credentials
+        const clientId = '5011442b489e4ff499abb0c05ea642c7';
+        const clientSecret = 'fe7d8db3ac674491b510b4cd5371ed8b';
+        const youTubeApiKey = 'AIzaSyA3m37O4nh5ge8OQU-zRCjCF2OqaNkSDnI';
+        
+        let currentFilter = 'track';
+        let accessToken = '';
+        let currentAudio = null;
+        let isPlaying = false;
+        let currentTrackProgress = 0;
+        let currentTrackDuration = 0;
+        let progressInterval = null;
+        let volume = 50;
+        let currentYouTubePlayer = null;
+        let currentTrack = null;
+        let audioSources = [];
+        let currentTrackIndex = -1;
+        let currentSearchResults = [];
+        let playbackQueue = [];
+        let audioEnabled = false;
+
+        // NEW: Check if audio is enabled
+        function checkAudioPermission() {
+            // Create a silent audio context to test permissions
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioContext = new AudioContext();
+            
+            // Try to resume audio context (this will trigger user interaction requirement)
+            if (audioContext.state === 'suspended') {
+                document.getElementById('audioPermissionBanner').style.display = 'block';
+                return false;
+            }
+            return true;
+        }
+
+        // NEW: Enable audio playback after user interaction
+        function enableAudioPlayback() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioContext = new AudioContext();
+            
+            audioContext.resume().then(() => {
+                audioEnabled = true;
+                document.getElementById('audioPermissionBanner').style.display = 'none';
+                console.log('Audio playback enabled');
+                
+                // If there's a current track, try playing it again
+                if (currentTrack && !isPlaying) {
+                    if (currentYouTubePlayer) {
+                        currentYouTubePlayer.playVideo();
+                    } else if (currentAudio) {
+                        currentAudio.play();
+                    }
+                }
+            }).catch(error => {
+                console.error('Error enabling audio:', error);
+                showError('Please click the play button to start audio playback.');
+            });
+        }
+
+        // YouTube IFrame API setup 
+        let youtubeAPIReady = false;
+
+        // Load YouTube IFrame API
+        function loadYouTubeAPI() {
+            if (!window.YT) {
+                const tag = document.createElement('script');
+                tag.src = "https://www.youtube.com/iframe_api";
+                const firstScriptTag = document.getElementsByTagName('script')[0];
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            }
+        }
+
+        // Called when YouTube API is ready 
+        window.onYouTubeIframeAPIReady = function() {
+            youtubeAPIReady = true;
+            console.log('YouTube API ready');
+        };
+
+        // Filter button handling
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.type;
+            });
+        });
+
+        // Enter key to search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // Get Spotify access token for search
+        async function getAccessToken() {
+            try {
+                const response = await fetch('https://accounts.spotify.com/api/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret)
+                    },
+                    body: 'grant_type=client_credentials'
+                });
+                
+                const data = await response.json();
+                accessToken = data.access_token;
+                return true;
+            } catch (error) {
+                console.error('Error getting token:', error);
+                showError('Failed to connect to Spotify API');
+                return false;
+            }
+        }
+
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            
+            if (!query) {
+                showError('Please enter a search term');
+                return;
+            }
+
+            document.querySelector('.loading').style.display = 'block';
+            document.querySelector('.error-message').style.display = 'none';
+            document.getElementById('resultsGrid').innerHTML = '';
+            document.getElementById('playlistsGrid').innerHTML = '';
+            document.getElementById('playlistsTitle').style.display = 'none';
+
+            if (!accessToken) {
+                const tokenReceived = await getAccessToken();
+                if (!tokenReceived) {
+                    document.querySelector('.loading').style.display = 'none';
+                    return;
+                }
+            }
+
+            try {
+                const response = await fetch(
+                    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=${currentFilter}&limit=20`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error('Search failed');
+                }
+
+                const data = await response.json();
+                currentSearchResults = data;
+                displayResults(data);
+                
+                // If searching for artists, also fetch playlists containing their songs
+                if (currentFilter === 'artist' && data.artists && data.artists.items.length > 0) {
+                    const artistId = data.artists.items[0].id;
+                    await fetchPlaylistsByArtist(artistId, data.artists.items[0].name);
+                }
+                
+                // If searching for albums, also fetch playlists containing songs from this album
+                if (currentFilter === 'album' && data.albums && data.albums.items.length > 0) {
+                    const albumId = data.albums.items[0].id;
+                    await fetchPlaylistsByAlbum(albumId, data.albums.items[0].name);
+                }
+            } catch (error) {
+                showError('Failed to search Spotify. Please try again.');
+                console.error('Search error:', error);
+            } finally {
+                document.querySelector('.loading').style.display = 'none';
+            }
+        }
+
+        // Fetch playlists that contain songs by a specific artist
+        async function fetchPlaylistsByArtist(artistId, artistName) {
+            try {
+                // First get the artist's top tracks
+                const tracksResponse = await fetch(
+                    `https://api.spotify.com/v1/artists/${artistId}/top-tracks?market=US`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`
+                        }
+                    }
+                );
+
+                if (!tracksResponse.ok) {
+                    return;
+                }
+
+                const tracksData = await tracksResponse.json();
+                
+                if (tracksData.tracks.length === 0) {
+                    return;
+                }
+
+                // Search for playlists that contain these tracks
+                const trackNames = tracksData.tracks.slice(0, 3).map(track => track.name);
+                const searchQuery = trackNames.join(' OR ');
+                
+                const playlistsResponse = await fetch(
+                    `https://api.spotify.com/v1/search?q=${encodeURIComponent(searchQuery)}&type=playlist&limit=10`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`
+                        }
+                    }
+                );
+
+                if (!playlistsResponse.ok) {
+                    return;
+                }
+
+                const playlistsData = await playlistsResponse.json();
+                displayPlaylists(playlistsData.playlists.items, `Playlists with ${artistName}`);
+            } catch (error) {
+                console.error('Error fetching playlists by artist:', error);
+            }
+        }
+
+        // Fetch playlists that contain songs from a specific album
+        async function fetchPlaylistsByAlbum(albumId, albumName) {
+            try {
+                // First get the album tracks
+                const albumResponse = await fetch(
+                    `https://api.spotify.com/v1/albums/${albumId}/tracks`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`
+                        }
+                    }
+                );
+
+                if (!albumResponse.ok) {
+                    return;
+                }
+
+                const albumData = await albumResponse.json();
+                
+                if (albumData.items.length === 0) {
+                    return;
+                }
+
+                // Search for playlists that contain these tracks
+                const trackNames = albumData.items.slice(0, 3).map(track => track.name);
+                const searchQuery = trackNames.join(' OR ');
+                
+                const playlistsResponse = await fetch(
+                    `https://api.spotify.com/v1/search?q=${encodeURIComponent(searchQuery)}&type=playlist&limit=10`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`
+                        }
+                    }
+                );
+
+                if (!playlistsResponse.ok) {
+                    return;
+                }
+
+                const playlistsData = await playlistsResponse.json();
+                displayPlaylists(playlistsData.playlists.items, `Playlists with songs from ${albumName}`);
+            } catch (error) {
+                console.error('Error fetching playlists by album:', error);
+            }
+        }
+
+        function displayPlaylists(playlists, title) {
+            if (!playlists || playlists.length === 0) {
+                return;
+            }
+
+            document.getElementById('playlistsTitle').textContent = title;
+            document.getElementById('playlistsTitle').style.display = 'block';
+            
+            const playlistsGrid = document.getElementById('playlistsGrid');
+            playlistsGrid.innerHTML = '';
+
+            playlists.forEach(playlist => {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.onclick = () => showDetails(playlist);
+
+                const image = playlist.images?.[0]?.url || 'https://via.placeholder.com/300x300/1a1a1a/ffffff?text=No+Image';
+                
+                card.innerHTML = `
+                    <img src="${image}" alt="${playlist.name}" class="result-image">
+                    <div class="result-title">${playlist.name}</div>
+                    <div class="result-artist">By ${playlist.owner.display_name}</div>
+                    <div class="result-details">
+                        <span class="detail-badge">${playlist.tracks.total} tracks</span>
+                    </div>
+                `;
+
+                playlistsGrid.appendChild(card);
+            });
+        }
+
+        function displayResults(data) {
+            const resultsGrid = document.getElementById('resultsGrid');
+            resultsGrid.innerHTML = '';
+
+            let items = [];
+            if (currentFilter === 'track' && data.tracks) {
+                items = data.tracks.items;
+                playbackQueue = items; // Set playback queue to current search results
+            } else if (currentFilter === 'artist' && data.artists) {
+                items = data.artists.items;
+            } else if (currentFilter === 'album' && data.albums) {
+                items = data.albums.items;
+            } else if (currentFilter === 'playlist' && data.playlists) {
+                items = data.playlists.items;
+            }
+
+            if (items.length === 0) {
+                showError('No results found. Try a different search term.');
+                return;
+            }
+
+            items.forEach((item, index) => {
+                const card = createResultCard(item, index);
+                resultsGrid.appendChild(card);
+            });
+        }
+
+        function createResultCard(item, index) {
+            const card = document.createElement('div');
+            card.className = 'result-card';
+            card.onclick = () => showDetails(item);
+
+            const image = item.images?.[0]?.url || item.album?.images?.[0]?.url || 'https://via.placeholder.com/300x300/1a1a1a/ffffff?text=No+Image';
+            
+            let title = item.name;
+            let subtitle = '';
+            let details = [];
+
+            if (currentFilter === 'track') {
+                subtitle = item.artists.map(a => a.name).join(', ');
+                details.push(`Album: ${item.album.name}`);
+                if (item.duration_ms) {
+                    details.push(`Duration: ${formatDuration(item.duration_ms)}`);
+                }
+            } else if (currentFilter === 'artist') {
+                subtitle = `${item.followers?.total?.toLocaleString() || 0} followers`;
+                details.push(`Popularity: ${item.popularity}/100`);
+                if (item.genres?.length > 0) {
+                    details.push(`Genres: ${item.genres.slice(0, 2).join(', ')}`);
+                }
+            } else if (currentFilter === 'album') {
+                subtitle = item.artists.map(a => a.name).join(', ');
+                details.push(`${item.total_tracks} tracks`);
+                details.push(`Released: ${item.release_date}`);
+            } else if (currentFilter === 'playlist') {
+                subtitle = `By ${item.owner.display_name}`;
+                details.push(`${item.tracks.total} tracks`);
+            }
+
+            card.innerHTML = `
+                <img src="${image}" alt="${title}" class="result-image">
+                <div class="result-title">${title}</div>
+                <div class="result-artist">${subtitle}</div>
+                <div class="result-details">
+                    ${details.slice(0, 2).map(d => `<span class="detail-badge">${d}</span>`).join('')}
+                </div>
+            `;
+
+            // Add play buttons for tracks
+            if (currentFilter === 'track') {
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.display = 'flex';
+                buttonContainer.style.gap = '10px';
+                buttonContainer.style.flexWrap = 'wrap';
+                buttonContainer.style.marginTop = '15px';
+                
+                // Spotify Preview Button
+                if (item.preview_url) {
+                    const previewButton = document.createElement('button');
+                    previewButton.className = 'play-button';
+                    previewButton.innerHTML = '▶ Spotify Preview';
+                    previewButton.onclick = (e) => {
+                        e.stopPropagation();
+                        playTrackPreview(item, index);
+                    };
+                    buttonContainer.appendChild(previewButton);
+                }
+                
+                // YouTube Full Song Button
+                const youtubeButton = document.createElement('button');
+                youtubeButton.className = 'play-button';
+                youtubeButton.innerHTML = '🎵 YouTube Full';
+                youtubeButton.onclick = (e) => {
+                    e.stopPropagation();
+                    searchAndPlayYouTube(item, index);
+                };
+                buttonContainer.appendChild(youtubeButton);
+                
+                card.appendChild(buttonContainer);
+                
+                if (item.preview_url) {
+                    const notice = document.createElement('div');
+                    notice.className = 'preview-notice';
+                    notice.innerHTML = 'Spotify: 30-sec preview | YouTube: Full song';
+                    card.appendChild(notice);
+                }
+            }
+
+            return card;
+        }
+
+        // Play track preview using HTML5 Audio 
+        function playTrackPreview(track, index) {
+            stopAllPlayback();
+            
+            if (!track.preview_url) {
+                showError('No preview available for this track');
+                return;
+            }
+            
+            // Check audio permission
+            if (!audioEnabled) {
+                document.getElementById('audioPermissionBanner').style.display = 'block';
+                showError('Please enable audio playback first by clicking the "Enable Audio" button at the top of the page.');
+                return;
+            }
+            
+            // Hide YouTube player
+            document.getElementById('youtubePlayerContainer').style.display = 'none';
+            
+            // Show the player section
+            document.getElementById('playerSection').style.display = 'block';
+            
+            // Update player UI
+            document.getElementById('playerAlbumArt').src = track.album.images[0].url;
+            document.getElementById('playerTrackName').textContent = track.name;
+            document.getElementById('playerArtistName').textContent = track.artists.map(a => a.name).join(', ');
+            
+            // Set current track index
+            currentTrackIndex = index;
+            currentTrack = track;
+            
+            // Create and play audio
+            currentAudio = new Audio(track.preview_url);
+            currentAudio.volume = volume / 100;
+            
+            currentAudio.addEventListener('loadedmetadata', function() {
+                currentTrackDuration = this.duration;
+                document.getElementById('totalTime').textContent = formatDuration(currentTrackDuration * 1000);
+            });
+            
+            currentAudio.addEventListener('timeupdate', function() {
+                currentTrackProgress = this.currentTime;
+                updateProgressBar();
+            });
+            
+            currentAudio.addEventListener('ended', function() {
+                isPlaying = false;
+                document.getElementById('playPauseButton').textContent = '▶';
+                stopProgressUpdate();
+                currentTrackProgress = 0;
+                updateProgressBar();
+                // Auto-play next track when current ends 
+                playNextTrack();
+            });
+            
+            // NEW: Handle audio play errors better
+            currentAudio.play().then(() => {
+                isPlaying = true;
+                document.getElementById('playPauseButton').textContent = '⏸';
+                startProgressUpdate();
+            }).catch(error => {
+                console.error('Error playing audio:', error);
+                showError('Error playing preview. Please click the "Enable Audio" button at the top of the page, then try again.');
+                document.getElementById('audioPermissionBanner').style.display = 'block';
+            });
+        }
+
+        // Search and play from YouTube 
+        async function searchAndPlayYouTube(track, index) {
+            document.querySelector('.loading').style.display = 'block';
+            
+            try {
+                const searchQuery = `${track.name} ${track.artists[0].name} official audio`;
+                
+                // Use YouTube Data API to search for the video
+                const response = await fetch(
+                    `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=${encodeURIComponent(searchQuery)}&type=video&key=${youTubeApiKey}`
+                );
+                
+                if (!response.ok) {
+                    throw new Error('YouTube API request failed');
+                }
+                
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    const videoId = data.items[0].id.videoId;
+                    playYouTubeVideo(videoId, track, index);
+                } else {
+                    throw new Error('No YouTube video found');
+                }
+                
+            } catch (error) {
+                console.error('YouTube search error:', error);
+                // Fallback to manual search link
+                showDetails(track);
+                
+                // Add YouTube player to modal
+                setTimeout(() => {
+                    const modalBody = document.getElementById('modalBody');
+                    const youtubeSection = document.createElement('div');
+                    const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(track.name + ' ' + track.artists[0].name + ' official audio')}`;
+                    
+                    youtubeSection.innerHTML = `
+                        <div style="text-align: center; margin: 20px 0;">
+                            <h3>YouTube Full Song</h3>
+                            <p>Could not automatically find the video. Try manual search:</p>
+                            <a href="${searchUrl}" target="_blank" class="spotify-link" style="margin: 10px;">Open YouTube Search</a>
+                            <div class="preview-notice">
+                                Note: For automatic playback, ensure your YouTube API key is valid
+                            </div>
+                        </div>
+                    `;
+                    modalBody.appendChild(youtubeSection);
+                }, 100);
+            } finally {
+                document.querySelector('.loading').style.display = 'none';
+            }
+        }
+
+        // Play YouTube video using IFrame API 
+        function playYouTubeVideo(videoId, track, index) {
+            stopAllPlayback();
+            
+            // Show YouTube player container
+            const playerContainer = document.getElementById('youtubePlayerContainer');
+            playerContainer.style.display = 'block';
+            
+            // Show the player section
+            document.getElementById('playerSection').style.display = 'block';
+            
+            // Update player UI
+            document.getElementById('playerAlbumArt').src = track.album.images[0].url;
+            document.getElementById('playerTrackName').textContent = track.name + ' (YouTube)';
+            document.getElementById('playerArtistName').textContent = track.artists.map(a => a.name).join(', ');
+            
+            // Set current track index
+            currentTrackIndex = index;
+            currentTrack = track;
+            
+            // Load YouTube Player
+            loadYouTubeAPI();
+            
+            // Wait for YouTube API to be ready
+            const checkYouTubeAPI = setInterval(() => {
+                if (youtubeAPIReady || window.YT) {
+                    clearInterval(checkYouTubeAPI);
+                    initializeYouTubePlayer(videoId);
+                }
+            }, 100);
+        }
+
+        // Initialize YouTube Player 
+        function initializeYouTubePlayer(videoId) {
+            if (currentYouTubePlayer) {
+                currentYouTubePlayer.destroy();
+            }
+            
+            currentYouTubePlayer = new YT.Player('youtubePlayer', {
+                height: '315',
+                width: '100%',
+                videoId: videoId,
+                playerVars: {
+                    'playsinline': 1,
+                    'enablejsapi': 1,
+                    'origin': window.location.origin,
+                    'autoplay': 1, // NEW: Enable autoplay
+                    'controls': 1  // Show YouTube controls for better UX
+                },
+                events: {
+                    'onReady': onYouTubePlayerReady,
+                    'onStateChange': onYouTubePlayerStateChange,
+                    'onError': onYouTubePlayerError
+                }
+            });
+        }
+
+        function onYouTubePlayerReady(event) {
+            // NEW: Don't autoplay immediately due to restrictions
+            // Let user click play in YouTube player for better compatibility
+            isPlaying = false;
+            document.getElementById('playPauseButton').textContent = '▶';
+            
+            // Show instruction for user
+            showError('Click the play button in the YouTube player above to start playback');
+        }
+
+        function onYouTubePlayerStateChange(event) {
+            // Update play/pause button based on YouTube player state
+            if (event.data == YT.PlayerState.PLAYING) {
+                isPlaying = true;
+                document.getElementById('playPauseButton').textContent = '⏸';
+                startProgressUpdate();
+            } else if (event.data == YT.PlayerState.PAUSED) {
+                isPlaying = false;
+                document.getElementById('playPauseButton').textContent = '▶';
+                stopProgressUpdate();
+            } else if (event.data == YT.PlayerState.ENDED) {
+                isPlaying = false;
+                document.getElementById('playPauseButton').textContent = '▶';
+                stopProgressUpdate();
+                // Auto-play next track when current ends 
+                playNextTrack();
+            }
+        }
+
+        function onYouTubePlayerError(event) {
+            console.error('YouTube Player Error:', event);
+            showError('Error playing YouTube video. Trying Spotify preview...');
+            
+            // Fallback to Spotify preview
+            if (currentTrack && currentTrack.preview_url) {
+                playTrackPreview(currentTrack, currentTrackIndex);
+            }
+        }
+
+        // Play next track in queue 
+        function playNextTrack() {
+            if (playbackQueue.length === 0 || currentTrackIndex === -1) return;
+            
+            const nextIndex = (currentTrackIndex + 1) % playbackQueue.length;
+            const nextTrack = playbackQueue[nextIndex];
+            
+            if (nextTrack) {
+                // Try YouTube first, then Spotify preview
+                if (nextTrack.preview_url) {
+                    playTrackPreview(nextTrack, nextIndex);
+                } else {
+                    searchAndPlayYouTube(nextTrack, nextIndex);
+                }
+            }
+        }
+
+        // Play previous track in queue
+        function playPreviousTrack() {
+            if (playbackQueue.length === 0 || currentTrackIndex === -1) return;
+            
+            let prevIndex = currentTrackIndex - 1;
+            if (prevIndex < 0) {
+                prevIndex = playbackQueue.length - 1;
+            }
+            
+            const prevTrack = playbackQueue[prevIndex];
+            
+            if (prevTrack) {
+                // Try YouTube first, then Spotify preview
+                if (prevTrack.preview_url) {
+                    playTrackPreview(prevTrack, prevIndex);
+                } else {
+                    searchAndPlayYouTube(prevTrack, prevIndex);
+                }
+            }
+        }
+
+        // Stop all current playback
+        function stopAllPlayback() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            if (currentYouTubePlayer) {
+                currentYouTubePlayer.stopVideo();
+                // Don't destroy the player, just stop it
+            }
+            isPlaying = false;
+            stopProgressUpdate();
+        }
+
+        function togglePlayPause() {
+            if (currentYouTubePlayer) {
+                // Control YouTube player
+                if (isPlaying) {
+                    currentYouTubePlayer.pauseVideo();
+                } else {
+                    currentYouTubePlayer.playVideo();
+                }
+            } else if (currentAudio) {
+                // Control HTML5 audio
+                if (isPlaying) {
+                    currentAudio.pause();
+                    isPlaying = false;
+                    document.getElementById('playPauseButton').textContent = '▶';
+                    stopProgressUpdate();
+                } else {
+                    currentAudio.play().then(() => {
+                        isPlaying = true;
+                        document.getElementById('playPauseButton').textContent = '⏸';
+                        startProgressUpdate();
+                    }).catch(error => {
+                        console.error('Error playing audio:', error);
+                        showError('Error playing audio. Please enable audio playback first.');
+                        document.getElementById('audioPermissionBanner').style.display = 'block';
+                    });
+                }
+            }
+        }
+
+        function updateProgressBar() {
+            if (currentYouTubePlayer && isPlaying) {
+                // Update progress for YouTube player
+                try {
+                    const currentTime = currentYouTubePlayer.getCurrentTime();
+                    const duration = currentYouTubePlayer.getDuration();
+                    
+                    if (duration > 0) {
+                        const progressPercent = (currentTime / duration) * 100;
+                        document.getElementById('progress').style.width = `${progressPercent}%`;
+                        
+                        document.getElementById('currentTime').textContent = formatDuration(currentTime * 1000);
+                        document.getElementById('totalTime').textContent = formatDuration(duration * 1000);
+                    }
+                } catch (e) {
+                    // YouTube API might not be ready
+                    console.log('YouTube API not ready for progress update');
+                }
+            } else if (currentTrackDuration) {
+                // Update progress for HTML5 audio
+                const progressPercent = (currentTrackProgress / currentTrackDuration) * 100;
+                document.getElementById('progress').style.width = `${progressPercent}%`;
+                
+                document.getElementById('currentTime').textContent = formatDuration(currentTrackProgress * 1000);
+            }
+        }
+
+        function startProgressUpdate() {
+            stopProgressUpdate();
+            progressInterval = setInterval(updateProgressBar, 1000);
+        }
+
+        function stopProgressUpdate() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+        }
+
+        function seekToPosition(event) {
+            if (!currentYouTubePlayer && !currentTrackDuration) return;
+            
+            const progressBar = document.getElementById('progressBar');
+            const rect = progressBar.getBoundingClientRect();
+            const clickPosition = event.clientX - rect.left;
+            const progressBarWidth = rect.width;
+            const seekPercent = Math.min(1, Math.max(0, clickPosition / progressBarWidth));
+            
+            if (currentYouTubePlayer) {
+                // Seek YouTube player
+                const duration = currentYouTubePlayer.getDuration();
+                const seekTime = duration * seekPercent;
+                currentYouTubePlayer.seekTo(seekTime, true);
+            } else if (currentAudio) {
+                // Seek HTML5 audio
+                const seekTime = currentTrackDuration * seekPercent;
+                currentAudio.currentTime = seekTime;
+                currentTrackProgress = seekTime;
+                updateProgressBar();
+            }
+        }
+
+        function setVolume(event) {
+            const volumeBar = document.getElementById('volumeBar');
+            const rect = volumeBar.getBoundingClientRect();
+            const clickPosition = event.clientX - rect.left;
+            const volumeBarWidth = rect.width;
+            volume = Math.min(100, Math.max(0, (clickPosition / volumeBarWidth) * 100));
+            
+            document.getElementById('volumeLevel').style.width = `${volume}%`;
+            
+            if (currentAudio) {
+                currentAudio.volume = volume / 100;
+            }
+            
+            if (currentYouTubePlayer) {
+                currentYouTubePlayer.setVolume(volume);
+            }
+            
+            // Update volume button icon
+            const volumeButton = document.getElementById('volumeButton');
+            if (volume === 0) {
+                volumeButton.textContent = '🔇';
+            } else if (volume < 50) {
+                volumeButton.textContent = '🔈';
+            } else {
+                volumeButton.textContent = '🔊';
+            }
+        }
+
+        function toggleMute() {
+            if (volume === 0) {
+                // Unmute - restore previous volume
+                volume = 50;
+            } else {
+                // Mute
+                volume = 0;
+            }
+            
+            document.getElementById('volumeLevel').style.width = `${volume}%`;
+            
+            if (currentAudio) {
+                currentAudio.volume = volume / 100;
+            }
+            
+            if (currentYouTubePlayer) {
+                currentYouTubePlayer.setVolume(volume);
+            }
+            
+            // Update volume button icon
+            const volumeButton = document.getElementById('volumeButton');
+            if (volume === 0) {
+                volumeButton.textContent = '🔇';
+            } else if (volume < 50) {
+                volumeButton.textContent = '🔈';
+            } else {
+                volumeButton.textContent = '🔊';
+            }
+        }
+
+        function showDetails(item) {
+            const modal = document.getElementById('detailModal');
+            const modalBody = document.getElementById('modalBody');
+
+            const image = item.images?.[0]?.url || item.album?.images?.[0]?.url || 'https://via.placeholder.com/400x400/1a1a1a/ffffff?text=No+Image';
+            
+            let infoRows = '';
+
+            if (currentFilter === 'track') {
+                infoRows = `
+                    <div class="info-row"><span class="info-label">Artist(s)</span><span class="info-value">${item.artists.map(a => a.name).join(', ')}</span></div>
+                    <div class="info-row"><span class="info-label">Album</span><span class="info-value">${item.album.name}</span></div>
+                    <div class="info-row"><span class="info-label">Duration</span><span class="info-value">${formatDuration(item.duration_ms)}</span></div>
+                    <div class="info-row"><span class="info-label">Popularity</span><span class="info-value">${item.popularity}/100</span></div>
+                    <div class="info-row"><span class="info-label">Release Date</span><span class="info-value">${item.album.release_date}</span></div>
+                    <div class="info-row"><span class="info-label">Track Number</span><span class="info-value">${item.track_number}</span></div>
+                    ${item.preview_url ? `<div class="info-row"><span class="info-label">Spotify Preview</span><span class="info-value">Available (30 sec)</span></div>` : ''}
+                `;
+            } else if (currentFilter === 'artist') {
+                infoRows = `
+                    <div class="info-row"><span class="info-label">Followers</span><span class="info-value">${item.followers?.total?.toLocaleString() || 0}</span></div>
+                    <div class="info-row"><span class="info-label">Popularity</span><span class="info-value">${item.popularity}/100</span></div>
+                    <div class="info-row"><span class="info-label">Genres</span><span class="info-value">${item.genres?.join(', ') || 'N/A'}</span></div>
+                `;
+            } else if (currentFilter === 'album') {
+                infoRows = `
+                    <div class="info-row"><span class="info-label">Artist(s)</span><span class="info-value">${item.artists.map(a => a.name).join(', ')}</span></div>
+                    <div class="info-row"><span class="info-label">Total Tracks</span><span class="info-value">${item.total_tracks}</span></div>
+                    <div class="info-row"><span class="info-label">Release Date</span><span class="info-value">${item.release_date}</span></div>
+                    <div class="info-row"><span class="info-label">Album Type</span><span class="info-value">${item.album_type}</span></div>
+                    <div class="info-row"><span class="info-label">Label</span><span class="info-value">${item.label || 'N/A'}</span></div>
+                `;
+            } else if (currentFilter === 'playlist') {
+                infoRows = `
+                    <div class="info-row"><span class="info-label">Owner</span><span class="info-value">${item.owner.display_name}</span></div>
+                    <div class="info-row"><span class="info-label">Total Tracks</span><span class="info-value">${item.tracks.total}</span></div>
+                    <div class="info-row"><span class="info-label">Public</span><span class="info-value">${item.public ? 'Yes' : 'No'}</span></div>
+                    <div class="info-row"><span class="info-label">Description</span><span class="info-value">${item.description || 'N/A'}</span></div>
+                `;
+            }
+
+            modalBody.innerHTML = `
+                <img src="${image}" alt="${item.name}" class="modal-image">
+                <h2 class="modal-title">${item.name}</h2>
+                <div class="modal-info">
+                    ${infoRows}
+                </div>
+                ${currentFilter === 'track' ? `
+                    <div style="text-align: center; margin: 20px 0;">
+                        <h3>Play Options</h3>
+                        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 15px 0;">
+                            ${item.preview_url ? `<button class="play-button" onclick="playTrackPreview(${JSON.stringify(item).replace(/"/g, '&quot;')}, ${playbackQueue.findIndex(t => t.id === item.id)})">Spotify Preview</button>` : ''}
+                            <button class="play-button" onclick="searchAndPlayYouTube(${JSON.stringify(item).replace(/"/g, '&quot;')}, ${playbackQueue.findIndex(t => t.id === item.id)})">YouTube Full Song</button>
+                            <a href="${item.external_urls.spotify}" target="_blank" class="spotify-link">Open in Spotify</a>
+                        </div>
+                    </div>
+                ` : `
+                    <div style="text-align: center;">
+                        <a href="${item.external_urls.spotify}" target="_blank" class="spotify-link">Open in Spotify</a>
+                    </div>
+                `}
+            `;
+
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.querySelector('.error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function formatDuration(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // NEW: Add click event to document to enable audio on first interaction
+        document.addEventListener('click', function() {
+            if (!audioEnabled) {
+                enableAudioPlayback();
+            }
+        });
+
+        // Initialize
+        getAccessToken();
+        loadYouTubeAPI();
+
+        // Check audio permissions on load
+        setTimeout(() => {
+            if (!audioEnabled) {
+                document.getElementById('audioPermissionBanner').style.display = 'block';
+            }
+        }, 2000);
+
+        // Event listeners for player controls
+        document.getElementById('playPauseButton').addEventListener('click', togglePlayPause);
+        document.getElementById('prevButton').addEventListener('click', playPreviousTrack);
+        document.getElementById('nextButton').addEventListener('click', playNextTrack);
+        document.getElementById('progressBar').addEventListener('click', seekToPosition);
+        document.getElementById('volumeBar').addEventListener('click', setVolume);
+        document.getElementById('volumeButton').addEventListener('click', toggleMute);
+
+        // Prevent seeking when clicking on progress text
+        document.getElementById('currentTime').addEventListener('click', (e) => e.stopPropagation());
+        document.getElementById('totalTime').addEventListener('click', (e) => e.stopPropagation());
+    </script>
+</body>
+</html>
